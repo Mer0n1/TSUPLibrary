@@ -12,10 +12,10 @@ public class DecryptFilter implements SegmentFilter {
     public void handle(Segment segment, FilterContext fContext,
                        Iterator<SegmentFilter> iterator) throws Exception {
 
-        if (segment.flags.has(Flags.ENCRYPTED)) {
-            segment.encryptedPayloadWithAuthTag = AEADUtils.decrypt(segment.encryptedPayloadWithAuthTag,
-                    segment.nonce, MyTSUPLibrary.getAeadKey());
-        }
+        if (segment.flags.has(Flags.ENCRYPTED))
+            segment.payload = AEADUtils.decrypt(segment.payload,
+                    segment.nonce, fContext.getConnectionContext().getCryptoContext().getAeadKey());
+
 
         fContext.next(segment, iterator);
     }

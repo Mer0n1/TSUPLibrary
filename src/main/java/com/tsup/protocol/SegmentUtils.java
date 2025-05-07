@@ -19,7 +19,7 @@ public class SegmentUtils {
         segment.flags = flags;
         segment.seq = seq;
         segment.nonce = nonce;
-        segment.encryptedPayloadWithAuthTag = data;
+        segment.payload = data;
 
         return segment;
     }
@@ -38,8 +38,8 @@ public class SegmentUtils {
         segment.nonce = new byte[AEADUtils.NonceSize];
         buffer.get(segment.nonce);
 
-        segment.encryptedPayloadWithAuthTag = new byte[buffer.remaining()];
-        buffer.get(segment.encryptedPayloadWithAuthTag);
+        segment.payload = new byte[buffer.remaining()];
+        buffer.get(segment.payload);
 
         return segment;
     }
@@ -57,8 +57,8 @@ public class SegmentUtils {
         segment.nonce = new byte[AEADUtils.NonceSize];
         buffer.get(segment.nonce);
 
-        segment.encryptedPayloadWithAuthTag = new byte[buffer.remaining()];
-        buffer.get(segment.encryptedPayloadWithAuthTag);
+        segment.payload = new byte[buffer.remaining()];
+        buffer.get(segment.payload);
 
         return segment;
     }

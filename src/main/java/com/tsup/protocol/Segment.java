@@ -8,20 +8,20 @@ public class Segment {
     public Flags flags;
     public short seq;
     public byte[] nonce;
-    public byte[] encryptedPayloadWithAuthTag;
+    public byte[] payload;
 
     public byte[] toBytes() {
         if (nonce == null)
             nonce = new byte[12];
-        if (encryptedPayloadWithAuthTag == null)
-            encryptedPayloadWithAuthTag = new byte[0];
+        if (payload == null)
+            payload = new byte[0];
 
-        ByteBuffer buf = ByteBuffer.allocate(16 + encryptedPayloadWithAuthTag.length);
+        ByteBuffer buf = ByteBuffer.allocate(16 + payload.length);
         buf.put(type);
         buf.put(flags.getValue());
         buf.putShort(seq);
         buf.put(nonce);
-        buf.put(encryptedPayloadWithAuthTag);
+        buf.put(payload);
         return buf.array();
     }
 }

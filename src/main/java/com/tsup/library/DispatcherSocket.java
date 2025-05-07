@@ -19,14 +19,18 @@ public class DispatcherSocket  {
 
     private Thread thread;
 
-    public DispatcherSocket(TSUPContext context) {
+    public DispatcherSocket(ConnectionContext context) {
+        /** Порядок важен. Если пакет устарел и не будет обрабатываться
+         * то его нет смысла расшифровывать и проверять другими фильтрами.
+         * Также стоит расшифровывать пакет заранее перед отправкой в фильтры Ack и Resend*/
+        filters.add(new SyncFilter());
         filters.add(new DecryptFilter());
         filters.add(new AckFilter());
-        filters.add(new ResendFilter());
+        //filters.add(new ResendFilter());
         filters.add(new FinalFilter());
 
         filterContext = new FilterContext(filters, context);
-        this.datagramSocket = context.getSocket();
+        this.datagramSocket = context.getContext().getSocket();
     }
 
     public void setOnMessageListener(TSUPMessageHandler handler) {
@@ -53,7 +57,7 @@ public class DispatcherSocket  {
                         dispatch(actualData);
 
                     } catch (Exception e) {
-                        System.err.println("ERROR: " + e.getMessage());
+                        //System.err.println("ERROR: " + e.getMessage());
                     }
                 }
             }
@@ -63,10 +67,14 @@ public class DispatcherSocket  {
     }
 
     public void makeDisconnect() throws IOException {
+        //посылаем пакет-уведомление об отключении
+        filterContext.getContext().sendDisconnect();
+        //закрываем сокет
+        datagramSocket.close();
         //остановка слушателя
         thread.interrupt();
-        //посылаем пакет-уведомление об отключении
-        filterContext.getContext().disconnect();
+        //меняем статус
+        filterContext.noticeDisconnectHandler("Disconnect");
     }
 
 }

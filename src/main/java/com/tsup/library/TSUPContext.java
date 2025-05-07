@@ -11,18 +11,16 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 
-/** Todo
-* Архитектура такая - многослойность. Если запрос имеет флаг - зашифрован, то пропускаем
-* пакет через слой расшифровки, если запрос имеет флаг другой то через другой слой.
-* Принцип фильтров как в spring
+/**
+* Контекст TSUP протокола. Отправка разного рода пакетов.
 * */
 public class TSUPContext {
 
     private final DatagramSocket socket;
     private final InetAddress remoteAddress;
     private final int remotePort;
+    //private final ACKMonitor ackMonitor;
     private short seq;
-
 
     public TSUPContext(DatagramSocket socket, InetAddress address, int port) {
         this.socket = socket;
@@ -32,7 +30,7 @@ public class TSUPContext {
     }
 
     /** Отправка ACK_BITFIELD.
-     *  Осуществляется на каждый 8 пакет. */
+     *  Осуществляется на каждый 8 пакет. */ //todo отправить байт payload потерянных пакетов.
     public void sendAck() throws IOException {
         Segment ackSegment = new Segment();
         ackSegment.type = Type.ACK;
@@ -53,7 +51,7 @@ public class TSUPContext {
         initSegment.type  = Type.HANDSHAKE_INIT;
         initSegment.seq   = 0;
         initSegment.flags = Flags.empty();
-        initSegment.encryptedPayloadWithAuthTag = publicRSAkey;
+        initSegment.payload = publicRSAkey;
 
         byte[] data = initSegment.toBytes();
         DatagramPacket packet = new DatagramPacket(data, data.length, remoteAddress, remotePort);
@@ -68,7 +66,7 @@ public class TSUPContext {
         haSegment.type  = Type.HANDSHAKE_ACK;
         haSegment.seq   = nextSeq();
         haSegment.flags = Flags.empty();
-        haSegment.encryptedPayloadWithAuthTag = AEADKey;
+        haSegment.payload = AEADKey;
 
         byte[] data = haSegment.toBytes();
         DatagramPacket packet = new DatagramPacket(data, data.length, remoteAddress, remotePort);
@@ -84,7 +82,7 @@ public class TSUPContext {
         dataSegment.seq = nextSeq();
         dataSegment.flags = Flags.encrypted();
         dataSegment.nonce = nonce;
-        dataSegment.encryptedPayloadWithAuthTag = data;
+        dataSegment.payload = data;
 
         byte[] data_ = dataSegment.toBytes();
         DatagramPacket packet = new DatagramPacket(data_, data_.length, remoteAddress, remotePort);
@@ -100,7 +98,7 @@ public class TSUPContext {
         dataSegment.flags = Flags.encrypted();
         dataSegment.flags.enable(Flags.RESEND_REQUEST);
         dataSegment.nonce = nonce;
-        dataSegment.encryptedPayloadWithAuthTag = data;
+        dataSegment.payload = data;
 
         byte[] data_ = dataSegment.toBytes();
         DatagramPacket packet = new DatagramPacket(data_, data_.length, remoteAddress, remotePort);
@@ -112,7 +110,7 @@ public class TSUPContext {
         resendData(new byte[]{}, new byte[AEADUtils.NonceSize]);
     }
 
-    public void disconnect() throws IOException {
+    public void sendDisconnect() throws IOException {
         Segment discSegment = new Segment();
         discSegment.type = Type.DISCONNECT;
         discSegment.seq = nextSeq();
@@ -129,8 +127,12 @@ public class TSUPContext {
         return (i & 0xFFFF) > (j & 0xFFFF);
     }
 
-    public synchronized short nextSeq() {
+    private synchronized short nextSeq() {
         return seq++;
+    }
+
+    public short getSeq() {
+        return seq;
     }
 
     public DatagramSocket getSocket() {
@@ -144,4 +146,8 @@ public class TSUPContext {
     public int getRemotePort() {
         return remotePort;
     }
+
+    /*public ACKMonitor getAckMonitor() {
+        return ackMonitor;
+    }*/
 }

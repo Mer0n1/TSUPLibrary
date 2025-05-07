@@ -13,12 +13,10 @@ public class FinalFilter implements SegmentFilter {
         //switch по типам
         switch (segment.type) {
             case Type.DATA:
-                fContext.noticeAllListeners(new String(segment.encryptedPayloadWithAuthTag));
-                break;
-            case Type.ACK:
+                fContext.noticeAllListeners(new String(segment.payload));
                 break;
             case Type.DISCONNECT:
-                fContext.noticeDisconnectHandler();
+                fContext.noticeDisconnectHandler("Disconnect request");
                 break;
             case Type.PING:
                 //fContext.getContext().

@@ -7,6 +7,9 @@ import com.tsup.crypto.RSAUtils;
 import com.tsup.library.TSUPConnectionManager;
 
 import javax.crypto.SecretKey;
+import java.net.DatagramSocket;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
@@ -129,11 +132,29 @@ class Testing {
         myTSUPLibrary.startServer();
         System.out.println("____________Successful____________");
 
-        myTSUPLibrary.setOnMessageReceiver(message ->  { System.out.println(message);});
+        myTSUPLibrary.setOnMessageReceiver(System.out::println);
 
     }
 
+    public static void ackClientTest() throws Exception {
+        MyTSUPLibrary myTSUPLibrary = new MyTSUPLibrary();
+        myTSUPLibrary.startClient("192.168.0.103");
+        System.out.println("____________Successful____________");
+
+        myTSUPLibrary.setOnMessageReceiver(System.out::println);
+
+        while (true) {
+            myTSUPLibrary.sendMessage("testAck");
+
+            Thread.sleep(100);
+        }
+    }
 }
+/** Будущие наработки... */
+/** Возможное изменение из MyTsupLibrary в TsupSocket обьект. - учесть порты.
+
+ *
+ * */
 
 public class Main {
 
@@ -142,7 +163,9 @@ public class Main {
         //Testing.handshake();
         //Testing.encryptRSAPlusAEAD();
         //Testing.SpeedTest();
-        Testing.serverTest();
+        //Testing.serverTest();
+        Testing.ackClientTest();
+
     }
 
 
