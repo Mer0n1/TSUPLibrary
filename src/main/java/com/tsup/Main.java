@@ -1,15 +1,13 @@
 package com.tsup;
 
+import com.tsup.library.TSUPServerSocket;
+import com.tsup.library.TSUPSocket;
 import com.tsup.protocol.Flags;
 import com.tsup.crypto.AEADUtils;
-import com.tsup.library.MyTSUPLibrary;
 import com.tsup.crypto.RSAUtils;
-import com.tsup.library.TSUPConnectionManager;
 
 import javax.crypto.SecretKey;
-import java.net.DatagramSocket;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
@@ -49,41 +47,6 @@ class Testing {
         System.out.println((int)flags.getValue());
     }
 
-    /*public static void creatingSegmentAndFromToByte() {
-        try {
-            String data = "Hello world";
-
-            TSUPCipheredSegmentLibrary segmentLibrary = new TSUPCipheredSegmentLibrary(AEAD.generateKey());
-
-            //обернем наше сообщение в качестве HANDSHAKE_INIT тип (хотя сообщение такого типа не имеют данных)
-            //но именно на этом этапе выполняется шифровка что вероятно не совсем корректно
-            Segment segment = segmentLibrary.wrap(data, Type.HANDSHAKE_INIT, new Flags((byte) 0), (short) 0);
-
-            //Преобразуем в байты
-            byte[] bytes = segment.toBytes();
-
-            //Преобразуем обратно в сегмент
-            Segment segment2 = TSUPSegmentLibrary.fromByteArray(bytes);
-            //на данном этапе payload не расшифрован.
-
-            //Расшифруем данные.
-            String decryptedData = new String(AEAD.decrypt(segment2.encryptedPayloadWithAuthTag,
-                    segment2.nonce, segmentLibrary.getSecretKey()));
-
-            //И выведем их.
-            System.out.println(decryptedData);
-
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
-    }*/
-
-    public static void handshake() {
-        TSUPConnectionManager sendLibrary = new TSUPConnectionManager();
-        //sendLibrary.listenerTest();
-        //sendLibrary.listenerHandshake();
-    }
-
     public static void encryptRSAPlusAEAD() throws Exception {
         Map<String, Object> rsaKeys = RSAUtils.initKey();
         RSAPublicKey publicKey = (RSAPublicKey) rsaKeys.get("PUBLIC_KEY");
@@ -102,25 +65,15 @@ class Testing {
 
 
     public static void SpeedTest() throws Exception {
-        MyTSUPLibrary myTSUPLibrary = new MyTSUPLibrary();
-        myTSUPLibrary.startClient("192.168.0.103");
+        TSUPSocket socket = new TSUPSocket();
+        socket.startClient("192.168.0.103", 6040);
         System.out.println("____________Successful____________");
-
-        long time = System.currentTimeMillis();
-
-        /*while (true) {
-            myTSUPLibrary.sendMessage("Hello there12");
-
-            Thread.sleep(1);
-
-            //System.err.println((System.currentTimeMillis() - time)/1000f);
-        }*/
 
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         String test = "oesntheprogram";
         scheduler.scheduleAtFixedRate(() -> {
             try {
-                myTSUPLibrary.sendMessage(test);
+                socket.sendMessage(test);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -128,30 +81,34 @@ class Testing {
     }
 
     public static void serverTest() throws Exception {
-        MyTSUPLibrary myTSUPLibrary = new MyTSUPLibrary();
-        myTSUPLibrary.startServer();
-        System.out.println("____________Successful____________");
-
-        myTSUPLibrary.setOnMessageReceiver(System.out::println);
-
+        TSUPServerSocket serverSocket = new TSUPServerSocket();
+        serverSocket.startServer(6040);
+        System.out.println("handshake done");
+        serverSocket.setOnMessageReceiver(System.out::println);
     }
 
-    public static void ackClientTest() throws Exception {
-        MyTSUPLibrary myTSUPLibrary = new MyTSUPLibrary();
-        myTSUPLibrary.startClient("192.168.0.103");
-        System.out.println("____________Successful____________");
+    public static void ackTest() throws Exception {
+        TSUPSocket socket = new TSUPSocket();
+        socket.startClient("192.168.0.103", 6040);
+        System.out.println("handshake done");
+        socket.setOnMessageReceiver(System.out::println);
 
-        myTSUPLibrary.setOnMessageReceiver(System.out::println);
+        int sec = 0;
 
         while (true) {
-            myTSUPLibrary.sendMessage("testAck");
+            socket.sendMessage("testMessage " + sec);
 
-            Thread.sleep(100);
+            Thread.sleep(500);
+            sec += 500;
+
+            if (sec > 10000)
+                socket.disconnect();
         }
     }
+
 }
 /** Будущие наработки... */
-/** Возможное изменение из MyTsupLibrary в TsupSocket обьект. - учесть порты.
+/**
 
  *
  * */
@@ -159,14 +116,7 @@ class Testing {
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        //Testing.creatingSegmentAndFromToByte();
-        //Testing.handshake();
-        //Testing.encryptRSAPlusAEAD();
-        //Testing.SpeedTest();
-        //Testing.serverTest();
-        Testing.ackClientTest();
 
     }
-
 
 }

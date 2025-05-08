@@ -3,7 +3,6 @@ package com.tsup.filters;
 import com.tsup.protocol.Flags;
 import com.tsup.protocol.Segment;
 import com.tsup.crypto.AEADUtils;
-import com.tsup.library.MyTSUPLibrary;
 
 import java.util.Iterator;
 

@@ -2,16 +2,21 @@ package com.tsup.library;
 
 import com.tsup.crypto.AEADUtils;
 
+import javax.crypto.SecretKey;
+
 public class TSUPServerSocket extends TSUPBaseSocket {
 
-    public void startServer() throws Exception {
-        if (getStatus() != TSUPConnectionManager.StatusConnection.connected) {
+    /** port - номер порта, который текущий сервер-сокет будет прослушивать */
+    public void startServer(int port) throws Exception {
+        if (getStatus() != TSUPConnectionManagerBase.StatusConnection.connected) {
 
-            tsupConnectionManager = new TSUPConnectionManager();
-            aeadKey = AEADUtils.generateKey();
+            tsupConnectionManager = new TSUPConnectionManagerServer();
+            SecretKey aeadKey = AEADUtils.generateKey();
 
             //слушаем handshake
-            context = tsupConnectionManager.listenerHandshake(aeadKey);
+            context = ((TSUPConnectionManagerServer)tsupConnectionManager).listenerHandshake(aeadKey, port);
+            //получаем контекст
+            cryptoContext = tsupConnectionManager.getCryptoContext();
             //Запуск диспетчера
             tsupConnectionManager.startDispatcher();
 

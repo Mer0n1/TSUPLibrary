@@ -14,10 +14,11 @@ public class DispatcherSocket  {
     private final List<SegmentFilter> filters = new ArrayList<>();
     private final FilterContext filterContext;
     private final DatagramSocket datagramSocket;
-
+    /**Буфер для приема пакетов
+     * В случае превышения буфера выбрасывается исключения типа Error auth tag */
     public final int maxBufferSize = 512;
-
-    private Thread thread;
+    /** Поток-слушатель. */
+    private Thread listener;
 
     public DispatcherSocket(ConnectionContext context) {
         /** Порядок важен. Если пакет устарел и не будет обрабатываться
@@ -44,7 +45,7 @@ public class DispatcherSocket  {
     }
 
     public void startListener() {
-        thread = new Thread(new Runnable() {
+        listener = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (true) {
@@ -57,13 +58,13 @@ public class DispatcherSocket  {
                         dispatch(actualData);
 
                     } catch (Exception e) {
-                        //System.err.println("ERROR: " + e.getMessage());
+                        System.err.println("ERROR: " + e.getMessage());
                     }
                 }
             }
         });
 
-        thread.start();
+        listener.start();
     }
 
     public void makeDisconnect() throws IOException {
@@ -72,7 +73,7 @@ public class DispatcherSocket  {
         //закрываем сокет
         datagramSocket.close();
         //остановка слушателя
-        thread.interrupt();
+        listener.interrupt();
         //меняем статус
         filterContext.noticeDisconnectHandler("Disconnect");
     }

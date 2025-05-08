@@ -2,21 +2,23 @@ package com.tsup.library;
 
 import com.tsup.crypto.AEADUtils;
 
-import javax.crypto.SecretKey;
-import java.util.Map;
-
 public abstract class TSUPBaseSocket {
-    protected static Map<String, Object> rsaKeys;
-    protected static SecretKey aeadKey;
+    protected CryptoContext cryptoContext;
     protected TSUPContext context;
-    protected TSUPConnectionManager tsupConnectionManager;
+    protected TSUPConnectionManagerBase tsupConnectionManager;
+
+    /** Стандартный порт прослушивания.
+     * Например при создании клиента мы не указываем собственный порт прослушивания,
+     * а устанавливаем стандартный*/
+    public static final int myStandardPort = 6060;
 
     public void sendMessage(String message) throws Exception {
 
-        if (tsupConnectionManager.getStatus() == TSUPConnectionManager.StatusConnection.connected) {
+        if (tsupConnectionManager.getStatus() == TSUPConnectionManagerBase.StatusConnection.connected &&
+                cryptoContext != null) {
 
             byte[] nonce = AEADUtils.generateIv();
-            byte[] data = AEADUtils.encrypt(message.getBytes(), nonce, aeadKey);
+            byte[] data = AEADUtils.encrypt(message.getBytes(), nonce, cryptoContext.getAeadKey());
 
             context.sendData(data, nonce);
         } else
@@ -24,7 +26,7 @@ public abstract class TSUPBaseSocket {
     }
 
     public void disconnect() {
-        if (tsupConnectionManager.getStatus() != TSUPConnectionManager.StatusConnection.disconnected)
+        if (tsupConnectionManager.getStatus() != TSUPConnectionManagerBase.StatusConnection.disconnected)
             tsupConnectionManager.disconnect();
     }
 
@@ -32,14 +34,10 @@ public abstract class TSUPBaseSocket {
         tsupConnectionManager.setOnMessageListener(callback);
     }
 
-    public synchronized static SecretKey getAeadKey() {
-        return aeadKey;
-    }
-
-    public TSUPConnectionManager.StatusConnection getStatus() {
+    public TSUPConnectionManagerBase.StatusConnection getStatus() {
         if (tsupConnectionManager != null)
             return tsupConnectionManager.getStatus();
         else
-            return TSUPConnectionManager.StatusConnection.none;
+            return TSUPConnectionManagerBase.StatusConnection.none;
     }
 }

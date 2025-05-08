@@ -10,8 +10,8 @@ import java.util.Base64;
 
 public class AEADUtils {
 
-    public static final String KEY_ALGORITHM = "AES";
-    public static final String KEY_TRANSFORMATION = "AES/GCM/NoPadding";
+    public static final String KEY_ALGORITHM = "AES"; //ChaCha20
+    public static final String KEY_TRANSFORMATION = "AES/GCM/NoPadding"; //ChaCha20-Poly1305
     public static final int keySize = 256;//bits
     public static final int AuthTagSize = 128; //bits
     public static final int NonceSize = 12; //bytes
