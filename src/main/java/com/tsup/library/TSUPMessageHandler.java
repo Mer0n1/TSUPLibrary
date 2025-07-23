@@ -1,6 +1,6 @@
 package com.tsup.library;
 
 public interface TSUPMessageHandler {
-    void onMessage(String message);
+    void onMessage(byte[] bytes);
 }
 

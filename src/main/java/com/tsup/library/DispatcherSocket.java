@@ -16,7 +16,7 @@ public class DispatcherSocket  {
     private final DatagramSocket datagramSocket;
     /**Буфер для приема пакетов
      * В случае превышения буфера выбрасывается исключения типа Error auth tag */
-    public final int maxBufferSize = 512;
+    public final int maxBufferSize = 4096; //512
     /** Поток-слушатель. */
     private Thread listener;
 

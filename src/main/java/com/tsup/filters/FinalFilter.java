@@ -13,7 +13,7 @@ public class FinalFilter implements SegmentFilter {
         //switch по типам
         switch (segment.type) {
             case Type.DATA:
-                fContext.noticeAllListeners(new String(segment.payload));
+                fContext.noticeAllListeners(segment.payload);
                 break;
             case Type.DISCONNECT:
                 fContext.noticeDisconnectHandler("Disconnect request");

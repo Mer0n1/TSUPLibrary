@@ -32,9 +32,9 @@ public class FilterContext {
 
     public void setOnDisconnectHandler(DisconnectHandler disconnectHandler) { this.disconnectHandler = disconnectHandler; }
 
-    public void noticeAllListeners(String message) {
+    public void noticeAllListeners(byte[] bytes) {
         for (TSUPMessageHandler handler : handlers)
-            handler.onMessage(message);
+            handler.onMessage(bytes);
     }
 
     public void noticeDisconnectHandler(String message) {

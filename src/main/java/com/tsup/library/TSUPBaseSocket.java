@@ -12,13 +12,13 @@ public abstract class TSUPBaseSocket {
      * а устанавливаем стандартный*/
     public static final int myStandardPort = 6060;
 
-    public void sendMessage(String message) throws Exception {
+    public void sendMessage(byte[] bytes) throws Exception {
 
         if (tsupConnectionManager.getStatus() == TSUPConnectionManagerBase.StatusConnection.connected &&
                 cryptoContext != null) {
 
             byte[] nonce = AEADUtils.generateIv();
-            byte[] data = AEADUtils.encrypt(message.getBytes(), nonce, cryptoContext.getAeadKey());
+            byte[] data = AEADUtils.encrypt(bytes, nonce, cryptoContext.getAeadKey());
 
             context.sendData(data, nonce);
         } else

@@ -8,6 +8,7 @@ import com.tsup.crypto.RSAUtils;
 
 import javax.crypto.SecretKey;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
@@ -73,7 +74,7 @@ class Testing {
         String test = "oesntheprogram";
         scheduler.scheduleAtFixedRate(() -> {
             try {
-                socket.sendMessage(test);
+                socket.sendMessage(test.getBytes());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -96,7 +97,7 @@ class Testing {
         int sec = 0;
 
         while (true) {
-            socket.sendMessage("testMessage " + sec);
+            socket.sendMessage(("testMessage " + sec).getBytes());
 
             Thread.sleep(500);
             sec += 500;
