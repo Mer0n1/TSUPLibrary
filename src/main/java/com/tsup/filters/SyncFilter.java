@@ -19,7 +19,7 @@ public class SyncFilter implements SegmentFilter {
                        Iterator<SegmentFilter> iterator) throws Exception {
 
         //Пропускаем старый неактуальный пакет.
-        if (!fContext.getContext().isNewer(segment.seq, lastSeq)) //seq < responseSeq
+        if (lastSeq != -1 && !fContext.getContext().isNewer(segment.seq, lastSeq)) //seq < responseSeq
             return;
 
         lastSeq = segment.seq;

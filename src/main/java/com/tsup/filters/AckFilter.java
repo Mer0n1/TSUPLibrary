@@ -28,7 +28,7 @@ public class AckFilter implements SegmentFilter {
         //Уведомляем что ack пришел.
         if (segment.flags.has(Flags.ACK_BITFIELD)) {
             fContext.getConnectionContext().getAckMonitor().ackReceived();
-System.err.println("ACK " + segment.seq);
+            //System.err.println("ACK " + segment.seq); //todo
         }
 
         //передадим то что ACK дошел успешно и никаких ошибок timeout нет

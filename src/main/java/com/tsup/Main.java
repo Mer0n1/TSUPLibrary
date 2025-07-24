@@ -7,14 +7,16 @@ import com.tsup.crypto.AEADUtils;
 import com.tsup.crypto.RSAUtils;
 
 import javax.crypto.SecretKey;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 class Testing {
     public static void testWithBase() throws Exception {
@@ -67,18 +69,27 @@ class Testing {
 
     public static void SpeedTest() throws Exception {
         TSUPSocket socket = new TSUPSocket();
-        socket.startClient("192.168.0.103", 6040);
+        socket.startClient("127.0.0.1", 6040);
         System.out.println("____________Successful____________");
 
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        String test = "oesntheprogram";
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
+        StringBuilder test = new StringBuilder();
+        for (int j = 0; j < 1000-32; j++)
+            test.append("1");
+
+        AtomicLong numberPacket = new AtomicLong();
         scheduler.scheduleAtFixedRate(() -> {
             try {
-                socket.sendMessage(test.getBytes());
+                numberPacket.getAndIncrement();
+                socket.sendMessage(test.toString().getBytes());
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }, 0, 900, TimeUnit.MICROSECONDS);
+        }, 0, 10, TimeUnit.MICROSECONDS);
+
+        scheduler.scheduleAtFixedRate(() -> {
+            System.out.println(numberPacket);
+        }, 1, 100, TimeUnit.MILLISECONDS);
     }
 
     public static void serverTest() throws Exception {
@@ -117,7 +128,7 @@ class Testing {
 public class Main {
 
     public static void main(String[] args) throws Exception {
-
+        //Testing.SpeedTest();
     }
 
 }

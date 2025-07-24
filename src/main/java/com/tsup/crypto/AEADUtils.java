@@ -7,6 +7,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
+import javax.crypto.spec.IvParameterSpec;
 
 public class AEADUtils {
 
@@ -28,7 +29,8 @@ public class AEADUtils {
             throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
             InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = Cipher.getInstance(KEY_TRANSFORMATION);
-        GCMParameterSpec spec = new GCMParameterSpec(AuthTagSize, iv);
+        GCMParameterSpec spec = new GCMParameterSpec(AuthTagSize, iv); //AES
+        //IvParameterSpec spec = new IvParameterSpec(iv); //ChaCha
         cipher.init(Cipher.ENCRYPT_MODE, key, spec);
 
         return cipher.doFinal(data);
@@ -38,7 +40,8 @@ public class AEADUtils {
             throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
             InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = Cipher.getInstance(KEY_TRANSFORMATION);
-        GCMParameterSpec spec = new GCMParameterSpec(AuthTagSize, iv);
+        GCMParameterSpec spec = new GCMParameterSpec(AuthTagSize, iv); //AES
+        //IvParameterSpec ivSpec = new IvParameterSpec(iv); //ChaCha
         cipher.init(Cipher.DECRYPT_MODE, key, spec);
 
         return cipher.doFinal(data);
